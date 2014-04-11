@@ -41,7 +41,7 @@ router.route('/bears')
 	})
 
 	// create a bear
-	.post(function(req, res, next) {
+	.post(function(req, res) {
 		
 		var bear = new Bear();
 		bear.name = req.body.name;
@@ -49,10 +49,11 @@ router.route('/bears')
 		bear.save(function(err) {
 			if (err)
 				throw err;
-			next();
+
+			res.send('Bear created!');
 		});
 
-		res.send('Bear created!');
+		
 	});
 
 // on routes where we pass in a specific bear
