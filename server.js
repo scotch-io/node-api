@@ -2,9 +2,13 @@
 // =============================================================================
 
 // call the packages we need
-var express  = require('express');
-var mongoose = require('mongoose');
-var app      = express();
+var express    = require('express');
+var mongoose   = require('mongoose');
+var bodyParser = require('body-parser');
+var app        = express();
+
+// configure app
+app.use(bodyParser());
 
 var port     = process.env.PORT || 8080; // set our port
 mongoose.connect('mongodb://node:node@novus.modulusmongo.net:27017/Iganiq8o'); // connect to our database
@@ -41,31 +45,28 @@ router.param('bear_id', function(req, res, next, id) {
 // on routes that end in /bears
 router.route('/bears')
 	// get all the bears
-	.get(function(req, res, next) {
+	.get(function(req, res) {
 		res.json({ what: 'get' });
-		next();
 	})
 	// create a bear
-	.post(function(req, res, next) {
-		res.json({ what: 'post' });
-		next();
+	.post(function(req, res) {
+		
+		console.log(req.body);
 	});
 
 // on routes where we pass in a specific bear
 router.route('/bears/:bear_id')
 	// get the bear with that id
-	.get(function(req, res, next) {
+	.get(function(req, res) {
 		res.json({ what: req.id });
 	})
 	// update the bear with this id
-	.put(function(req, res, next) {
+	.put(function(req, res) {
 		res.json({ what: 'put' });
-		next();
 	})
 	// delete the bear with this id
-	.delete(function(req, res, next) {
+	.delete(function(req, res) {
 		res.json({ what: 'delete' });
-		next();
 	});
 
 
