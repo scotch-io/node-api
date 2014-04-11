@@ -22,32 +22,24 @@ var router = express.Router();
 
 // middleware to use for all requests
 router.use(function(req, res, next) {
-
 	// do logging
-	console.log('whatwhat');
-
-	// handle errors
-
-	next();
-});
-
-router.param('bear_id', function(req, res, next, id) {
-
-	// do validations here
-
-	// or we can get the bear
-
-	// store the bear for use in the req
-	req.id = id;
+	console.log('Something is happening.');
 	next();
 });
 
 // on routes that end in /bears
+// ----------------------------------------------------
 router.route('/bears')
+
 	// get all the bears
 	.get(function(req, res) {
-		res.json({ what: 'get' });
+		Bear.find(function(err, bears) {
+			if (err)
+				res.send(err);
+			res.json(bears);
+		});
 	})
+
 	// create a bear
 	.post(function(req, res, next) {
 		
@@ -57,28 +49,67 @@ router.route('/bears')
 		bear.save(function(err) {
 			if (err)
 				throw err;
-
-			console.log('bear is safe!');
 			next();
 		});
 
-		console.log('success');
-		res.send('bear did it!');
+		res.send('Bear created!');
 	});
 
 // on routes where we pass in a specific bear
+// ----------------------------------------------------
+
+// middleware to handle the :bear_id passed through the url
+router.param('bear_id', function(req, res, next, id) {
+
+	// do validations here
+	// or we can get the bear
+	// store the bear for use in the req
+	req.id = id;
+	console.log(id);
+	
+	next();
+});
+
+// :bear_id will pass through the 
 router.route('/bears/:bear_id')
+
 	// get the bear with that id
 	.get(function(req, res) {
-		res.json({ what: req.id });
+		Bear.find(req.id, function(err, bear) {
+			if (err)
+				res.send(err);
+			res.json(bear);
+		});
 	})
+
 	// update the bear with this id
 	.put(function(req, res) {
-		res.json({ what: 'put' });
+		Bear.findById(req.id, function(err, bear) {
+
+			if (err)
+				res.send(err);
+
+			bear.name = req.body.name;
+			bear.save(function(err) {
+				if (err)
+					res.send(err);
+
+				res.send('Bear updated!');
+			});
+
+		});
 	})
+
 	// delete the bear with this id
 	.delete(function(req, res) {
-		res.json({ what: 'delete' });
+		Bear.remove({
+			_id: req.id
+		}, function(err, bear) {
+			if (err)
+				res.send(err);
+
+			res.send('Successfully deleted');
+		});
 	});
 
 
