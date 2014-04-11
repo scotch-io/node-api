@@ -18,7 +18,12 @@ var router = express.Router();
 
 // middleware to use for all requests
 router.use(function(req, res, next) {
+
+	// do logging
 	console.log('whatwhat');
+
+	// handle errors
+
 	next();
 });
 
@@ -33,24 +38,31 @@ router.param('bear_id', function(req, res, next, id) {
 	next();
 });
 
+// on routes that end in /bears
 router.route('/bears')
+	// get all the bears
 	.get(function(req, res, next) {
 		res.json({ what: 'get' });
 		next();
 	})
+	// create a bear
 	.post(function(req, res, next) {
 		res.json({ what: 'post' });
 		next();
 	});
 
+// on routes where we pass in a specific bear
 router.route('/bears/:bear_id')
+	// get the bear with that id
 	.get(function(req, res, next) {
 		res.json({ what: req.id });
 	})
+	// update the bear with this id
 	.put(function(req, res, next) {
 		res.json({ what: 'put' });
 		next();
 	})
+	// delete the bear with this id
 	.delete(function(req, res, next) {
 		res.json({ what: 'delete' });
 		next();
