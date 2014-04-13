@@ -3,7 +3,6 @@
 
 // call the packages we need
 var express    = require('express');
-var mongoose   = require('mongoose');
 var bodyParser = require('body-parser');
 var app        = express();
 
@@ -11,6 +10,8 @@ var app        = express();
 app.use(bodyParser());
 
 var port     = process.env.PORT || 8080; // set our port
+
+var mongoose   = require('mongoose');
 mongoose.connect('mongodb://node:node@novus.modulusmongo.net:27017/Iganiq8o'); // connect to our database
 var Bear     = require('./app/models/bear');
 
@@ -27,56 +28,48 @@ router.use(function(req, res, next) {
 	next();
 });
 
+// test route to make sure everything is working (accessed at GET http://localhost:8080/api)
+router.get('/', function(req, res) {
+	res.json({ message: 'hooray! welcome to our api!' });	
+});
+
 // on routes that end in /bears
 // ----------------------------------------------------
 router.route('/bears')
 
-	// get all the bears
+	// create a bear (accessed at POST http://localhost:8080/bears)
+	.post(function(req, res) {
+		
+		var bear = new Bear();		// create a new instance of the Bear model
+		bear.name = req.body.name;  // set the bears name (comes from the request)
+
+		bear.save(function(err) {
+			if (err)
+				res.send(err);
+
+			res.json({ message: 'Bear created!' });
+		});
+
+		
+	})
+
+	// get all the bears (accessed at GET http://localhost:8080/api/bears)
 	.get(function(req, res) {
 		Bear.find(function(err, bears) {
 			if (err)
 				res.send(err);
+
 			res.json(bears);
 		});
-	})
-
-	// create a bear
-	.post(function(req, res) {
-		
-		var bear = new Bear();
-		bear.name = req.body.name;
-
-		bear.save(function(err) {
-			if (err)
-				throw err;
-
-			res.send('Bear created!');
-		});
-
-		
 	});
 
-// on routes where we pass in a specific bear
+// on routes that end in /bears/:bear_id
 // ----------------------------------------------------
-
-// middleware to handle the :bear_id passed through the url
-router.param('bear_id', function(req, res, next, id) {
-
-	// do validations here
-	// or we can get the bear
-	// store the bear for use in the req
-	req.id = id;
-	console.log(id);
-	
-	next();
-});
-
-// :bear_id will pass through the 
 router.route('/bears/:bear_id')
 
 	// get the bear with that id
 	.get(function(req, res) {
-		Bear.find(req.id, function(err, bear) {
+		Bear.find(req.params.bear_id, function(err, bear) {
 			if (err)
 				res.send(err);
 			res.json(bear);
@@ -85,7 +78,7 @@ router.route('/bears/:bear_id')
 
 	// update the bear with this id
 	.put(function(req, res) {
-		Bear.findById(req.id, function(err, bear) {
+		Bear.findById(req.params.bear_id, function(err, bear) {
 
 			if (err)
 				res.send(err);
@@ -95,7 +88,7 @@ router.route('/bears/:bear_id')
 				if (err)
 					res.send(err);
 
-				res.send('Bear updated!');
+				res.json({ message: 'Bear updated!' });
 			});
 
 		});
@@ -104,12 +97,12 @@ router.route('/bears/:bear_id')
 	// delete the bear with this id
 	.delete(function(req, res) {
 		Bear.remove({
-			_id: req.id
+			_id: req.params.bear_id
 		}, function(err, bear) {
 			if (err)
 				res.send(err);
 
-			res.send('Successfully deleted');
+			res.json({ message: 'Successfully deleted' });
 		});
 	});
 
