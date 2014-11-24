@@ -2,104 +2,103 @@
 // =============================================================================
 
 // call the packages we need
-var express    = require('express');
-var bodyParser = require('body-parser');
-var app        = express();
+var express    = require('express');		// call express
+var app        = express(); 				// define our app using express
+var bodyParser = require('body-parser'); 	// get body-parser
+var morgan 	   = require('morgan'); 		// used to see requests
 
 // configure app
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(morgan('dev')); 		// log all requests to the console
 
 var port     = process.env.PORT || 8080; // set our port
 
+// get mongoose
+// connect to our database
+// grab out User model
 var mongoose   = require('mongoose');
-mongoose.connect('mongodb://node:node@novus.modulusmongo.net:27017/Iganiq8o'); // connect to our database
-var Bear     = require('./app/models/bear');
+mongoose.connect('mongodb://node:node@novus.modulusmongo.net:27017/Iganiq8o'); 
+var User     = require('./app/models/user');
 
 // ROUTES FOR OUR API
 // =============================================================================
 
-// create our router
+// // get an instance of the express router
 var router = express.Router();
 
-// middleware to use for all requests
-router.use(function(req, res, next) {
-	// do logging
-	console.log('Something is happening.');
-	next();
-});
-
-// test route to make sure everything is working (accessed at GET http://localhost:8080/api)
+// test route to make sure everything is working 
+// accessed at GET http://localhost:8080/api
 router.get('/', function(req, res) {
 	res.json({ message: 'hooray! welcome to our api!' });	
 });
 
-// on routes that end in /bears
+// on routes that end in /users
 // ----------------------------------------------------
-router.route('/bears')
+router.route('/users')
 
-	// create a bear (accessed at POST http://localhost:8080/bears)
+	// create a user (accessed at POST http://localhost:8080/users)
 	.post(function(req, res) {
 		
-		var bear = new Bear();		// create a new instance of the Bear model
-		bear.name = req.body.name;  // set the bears name (comes from the request)
+		var user = new User();		// create a new instance of the User model
+		user.name = req.body.name;  // set the users name (comes from the request)
 
-		bear.save(function(err) {
+		user.save(function(err) {
 			if (err)
 				res.send(err);
 
-			res.json({ message: 'Bear created!' });
+			res.json({ message: 'User created!' });
 		});
 
 		
 	})
 
-	// get all the bears (accessed at GET http://localhost:8080/api/bears)
+	// get all the users (accessed at GET http://localhost:8080/api/users)
 	.get(function(req, res) {
-		Bear.find(function(err, bears) {
+		User.find(function(err, users) {
 			if (err)
 				res.send(err);
 
-			res.json(bears);
+			res.json(users);
 		});
 	});
 
-// on routes that end in /bears/:bear_id
+// on routes that end in /users/:user_id
 // ----------------------------------------------------
-router.route('/bears/:bear_id')
+router.route('/users/:user_id')
 
-	// get the bear with that id
+	// get the user with that id
 	.get(function(req, res) {
-		Bear.findById(req.params.bear_id, function(err, bear) {
+		User.findById(req.params.user_id, function(err, user) {
 			if (err)
 				res.send(err);
-			res.json(bear);
+			res.json(user);
 		});
 	})
 
-	// update the bear with this id
+	// update the user with this id
 	.put(function(req, res) {
-		Bear.findById(req.params.bear_id, function(err, bear) {
+		User.findById(req.params.user_id, function(err, user) {
 
 			if (err)
 				res.send(err);
 
-			bear.name = req.body.name;
-			bear.save(function(err) {
+			user.name = req.body.name;
+			user.save(function(err) {
 				if (err)
 					res.send(err);
 
-				res.json({ message: 'Bear updated!' });
+				res.json({ message: 'User updated!' });
 			});
 
 		});
 	})
 
-	// delete the bear with this id
+	// delete the user with this id
 	.delete(function(req, res) {
-		Bear.remove({
-			_id: req.params.bear_id
-		}, function(err, bear) {
+		User.remove({
+			_id: req.params.user_id
+		}, function(err, user) {
 			if (err)
 				res.send(err);
 
